@@ -1,0 +1,48 @@
+#!/bin/bash
+STATE_DIR=~/.worktime
+TODAY=$(date +%Y-%m-%d)
+STATE_FILE="$STATE_DIR/$TODAY.log"
+
+if [ ! -f "$STATE_FILE" ]; then
+  echo "No activity logged for today ($TODAY)"
+  exit 1
+fi
+
+source "$STATE_FILE"
+
+# Constants
+BREAK_THRESHOLD=60
+WARNING_7H=420
+LIMIT_8H=480
+
+# Calculate time until next break and remaining
+if [ $active_minutes -ge $LIMIT_8H ]; then
+  remaining="0 min"
+  next_break="Limit reached"
+elif [ $active_minutes -ge $WARNING_7H ]; then
+  remaining=$((LIMIT_8H - active_minutes))
+  next_break="Limit"
+else
+  remaining=$((BREAK_THRESHOLD - active_minutes))
+  next_break="$BREAK_THRESHOLD min"
+fi
+
+# Format active time
+hours=$((active_minutes / 60))
+mins=$((active_minutes % 60))
+active_str="${hours}h ${mins}m"
+
+# Print status
+if [ "$VERBOSE" = "true" ] || [ "$1" = "--verbose" ]; then
+  echo "Work Time Tracker - $TODAY"
+  echo "=========================="
+  echo "Active time: $active_str"
+  echo ""
+  echo "Time to next break: $next_break (at $BREAK_THRESHOLD min)"
+  echo "Time to daily limit: $remaining min (at $LIMIT_8H min)"
+  echo ""
+  echo "Log file: $STATE_FILE"
+else
+  # Compact format for quick viewing
+  echo "⏱ $active_str"
+fi
