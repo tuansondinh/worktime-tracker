@@ -41,36 +41,38 @@ launchctl bootstrap "gui/$(id -u)" "$PLIST_DEST"
 launchctl kickstart -k "gui/$(id -u)/$LABEL"
 echo "✓ Tracker started"
 
-# Auto-install SwiftBar plugin if SwiftBar is present
-SWIFTBAR_DIRS=(
-  "$HOME/Library/Application Support/SwiftBar/Plugins"
-  "$HOME/Documents/SwiftBar"
-  "$HOME/SwiftBar"
-)
-
+# Set up SwiftBar plugins folder and link plugin
 SWIFTBAR_PLUGIN_DIR=""
-for dir in "${SWIFTBAR_DIRS[@]}"; do
-  if [ -d "$dir" ]; then
-    SWIFTBAR_PLUGIN_DIR="$dir"
-    break
-  fi
-done
 
-# Also check SwiftBar's own preferences for plugin folder
+# Check if user already has a configured plugins folder
+PREF_DIR=$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null || true)
+if [ -n "$PREF_DIR" ] && [ -d "$PREF_DIR" ]; then
+  SWIFTBAR_PLUGIN_DIR="$PREF_DIR"
+fi
+
+# Check common locations
 if [ -z "$SWIFTBAR_PLUGIN_DIR" ]; then
-  PREF_DIR=$(defaults read com.ameba.SwiftBar PluginDirectory 2>/dev/null || true)
-  if [ -n "$PREF_DIR" ] && [ -d "$PREF_DIR" ]; then
-    SWIFTBAR_PLUGIN_DIR="$PREF_DIR"
-  fi
+  for dir in "$HOME/Library/Application Support/SwiftBar/Plugins" "$HOME/Documents/SwiftBar" "$HOME/SwiftBar"; do
+    if [ -d "$dir" ]; then
+      SWIFTBAR_PLUGIN_DIR="$dir"
+      break
+    fi
+  done
 fi
 
-if [ -n "$SWIFTBAR_PLUGIN_DIR" ]; then
-  ln -sf "$WORKTIME_DIR/worktime.1m.sh" "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
-  echo "✓ SwiftBar plugin installed to $SWIFTBAR_PLUGIN_DIR"
-else
-  echo "  SwiftBar not found — skipping plugin install"
-  echo "  To add later: ln -sf ~/.worktime/worktime.1m.sh <your-swiftbar-plugins-folder>/worktime.1m.sh"
+# No folder found — create default and configure SwiftBar to use it
+if [ -z "$SWIFTBAR_PLUGIN_DIR" ]; then
+  SWIFTBAR_PLUGIN_DIR="$HOME/SwiftBar"
+  mkdir -p "$SWIFTBAR_PLUGIN_DIR"
+  defaults write com.ameba.SwiftBar PluginDirectory "$SWIFTBAR_PLUGIN_DIR"
+  echo "✓ SwiftBar plugins folder created at ~/SwiftBar"
 fi
+
+ln -sf "$WORKTIME_DIR/worktime.1m.sh" "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
+echo "✓ SwiftBar plugin linked to $SWIFTBAR_PLUGIN_DIR"
+
+# Launch SwiftBar so it picks up the plugin
+open -a SwiftBar 2>/dev/null || true
 
 echo ""
 echo "✓ Done! Run: worktime"
