@@ -6,7 +6,7 @@ TODAY=$(date +%Y-%m-%d)
 case "${1:-}" in
   stats)
     shift
-    exec "$(dirname "$0")/stats.sh" "$@"
+    exec "$HOME/.worktime/stats.sh" "$@"
     ;;
   --help|-h|"help")
     echo "Usage: worktime [command] [options]"

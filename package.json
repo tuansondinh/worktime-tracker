@@ -1,0 +1,35 @@
+{
+  "name": "@tuan_son.dinh/worktime-tracker",
+  "version": "1.0.0",
+  "description": "macOS idle-aware work time tracker with 8h daily limit, break reminders, and SwiftBar support",
+  "os": [
+    "darwin"
+  ],
+  "scripts": {
+    "postinstall": "bash setup.sh"
+  },
+  "bin": {
+    "worktime": "worktime"
+  },
+  "files": [
+    "track.sh",
+    "setup.sh",
+    "stats.sh",
+    "worktime",
+    "worktime.1m.sh",
+    "com.son.worktime.plist",
+    "README.md"
+  ],
+  "keywords": [
+    "worktime",
+    "time-tracker",
+    "macos",
+    "productivity",
+    "launchd",
+    "swiftbar"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=14"
+  }
+}
