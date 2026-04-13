@@ -21,7 +21,7 @@ mins=$((active_minutes % 60))
 
 # Colors based on thresholds
 if [ $active_minutes -ge $LIMIT_8H ]; then
-  color="⬛"  # Red for limit
+  color="🔴"  # Red for limit
 elif [ $active_minutes -ge $WARNING_7H ]; then
   color="🟡"  # Yellow at 7h warning
 else

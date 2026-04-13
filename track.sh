@@ -46,7 +46,7 @@ if [ -z "$IDLE_TIME" ]; then
   IDLE_TIME=999999
 fi
 
-if [ "$IDLE_TIME" -lt 90 ] && [ "$active_minutes" -lt "$LIMIT_8H" ]; then
+if [ "$IDLE_TIME" -lt 90 ]; then
   active_minutes=$((active_minutes + 1))
 
   if [ "$active_minutes" -ge $((last_break_notified + BREAK_THRESHOLD)) ]; then
@@ -62,7 +62,6 @@ if [ "$IDLE_TIME" -lt 90 ] && [ "$active_minutes" -lt "$LIMIT_8H" ]; then
   if [ "$active_minutes" -ge "$LIMIT_8H" ] && [ "$limit_8h_sent" -eq 0 ]; then
     notify "Daily limit reached - display will sleep now"
     limit_8h_sent=1
-    write_state
     pmset displaysleepnow
   fi
 
