@@ -1,6 +1,32 @@
 #!/bin/bash
 STATE_DIR=~/.worktime
 TODAY=$(date +%Y-%m-%d)
+
+# Route subcommands
+case "${1:-}" in
+  stats)
+    shift
+    exec "$(dirname "$0")/stats.sh" "$@"
+    ;;
+  --help|-h|"help")
+    echo "Usage: worktime [command] [options]"
+    echo ""
+    echo "Commands:"
+    echo "  (default)    Show today's active time"
+    echo "  stats        Show usage statistics"
+    echo ""
+    echo "Options (default command):"
+    echo "  --verbose    Show detailed status"
+    echo ""
+    echo "Options (stats):"
+    echo "  --week       This week's stats (default)"
+    echo "  --month      This month's stats"
+    echo "  --all        All-time stats"
+    echo "  --json       Output as JSON"
+    exit 0
+    ;;
+esac
+
 STATE_FILE="$STATE_DIR/$TODAY.log"
 
 if [ ! -f "$STATE_FILE" ]; then

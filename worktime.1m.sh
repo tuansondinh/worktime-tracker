@@ -4,7 +4,7 @@ TODAY=$(date +%Y-%m-%d)
 STATE_FILE="$STATE_DIR/$TODAY.log"
 
 if [ ! -f "$STATE_FILE" ]; then
-  echo "⏱ 0m"
+  echo "0m"
   exit 0
 fi
 
@@ -23,32 +23,38 @@ mins=$((active_minutes % 60))
 if [ $active_minutes -ge $LIMIT_8H ]; then
   color="⬛"  # Red for limit
 elif [ $active_minutes -ge $WARNING_7H ]; then
-  color="🟠"  # Orange for warning
-elif [ $active_minutes -ge $BREAK_THRESHOLD ]; then
-  color="🟡"  # Yellow for break reminder
+  color="🟡"  # Yellow at 7h warning
 else
-  color="🟢"  # Green for normal
+  color="🟢"  # Green before 7h
 fi
 
 # Compact format for menu bar
-echo "${color}⏱ ${hours}h ${mins}m"
+echo "${color}${hours}h ${mins}m"
 
-# Dropdown content
-if [ "$DROPDOWN" = "true" ] || [ "$1" = "--dropdown" ]; then
-  echo "---"
-  echo "Time: $active_minutes min"
+# Dropdown (always emitted; SwiftBar renders lines after first ---)
+echo "---"
+echo "Today: ${hours}h ${mins}m  (${active_minutes} min worked)"
+echo "---"
 
-  if [ $active_minutes -ge $LIMIT_8H ]; then
-    echo "Status: 🛑 Limit reached"
-  elif [ $active_minutes -ge $WARNING_7H ]; then
-    echo "Status: ⚠ 1 hour left"
-  elif [ $active_minutes -ge $BREAK_THRESHOLD ]; then
-    echo "Status: ☕ Time for a break"
-  else
-    echo "Status: ✓ On track"
-  fi
-
-  echo "---"
-  echo "Break at: $BREAK_THRESHOLD min"
-  echo "Limit at: $LIMIT_8H min"
+if [ $active_minutes -ge $LIMIT_8H ]; then
+  echo "Status: 🛑 Daily limit reached"
+elif [ $active_minutes -ge $WARNING_7H ]; then
+  remaining_limit=$((LIMIT_8H - active_minutes))
+  echo "Status: ⚠️  1 hour left  (${remaining_limit} min to limit)"
+elif [ $active_minutes -ge $BREAK_THRESHOLD ]; then
+  echo "Status: ☕ Time for a break!"
+else
+  mins_to_break=$((BREAK_THRESHOLD - active_minutes))
+  echo "Status: ✓ On track"
+  echo "Next break in: ${mins_to_break} min"
 fi
+
+if [ $active_minutes -lt $LIMIT_8H ]; then
+  mins_to_limit=$((LIMIT_8H - active_minutes))
+  limit_h=$((mins_to_limit / 60))
+  limit_m=$((mins_to_limit % 60))
+  echo "Daily limit in: ${limit_h}h ${limit_m}m"
+fi
+
+echo "---"
+echo "Break threshold: ${BREAK_THRESHOLD} min | Daily limit: ${LIMIT_8H} min"

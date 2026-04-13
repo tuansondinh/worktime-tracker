@@ -21,8 +21,8 @@ cd /Users/sonwork/Workspace/worktime-tracker
 This will:
 1. Create `~/.worktime/` directory and scripts
 2. Symlink `worktime` to `~/.local/bin/`
-3. Install launchd plist
-4. Start the tracker (if previously loaded, will be reloaded)
+3. Install `~/Library/LaunchAgents/com.son.worktime.plist`
+4. Reload and start tracker via `launchctl bootstrap`
 
 ## Usage
 
@@ -52,7 +52,13 @@ Manual reset: edit today's log file or delete it to start fresh.
 
 - `track.sh` - Main tracker (runs every 60s via launchd)
 - `worktime` - Status command (symlinked to `~/.local/bin/worktime`)
-- `worktime.1m.sh` - SwiftBar plugin (optional)
+- `worktime.1m.sh` - SwiftBar plugin (install this file only in SwiftBar plugin directory)
+- `stats.sh` - CLI stats subcommand used by `worktime stats`
+
+## SwiftBar
+
+Install only `~/.worktime/worktime.1m.sh` in SwiftBar plugin directory.
+Do not place `track.sh`, `worktime`, or `stats.sh` there, or SwiftBar will show them as separate plugins.
 
 ## Uninstall
 
