@@ -17,6 +17,7 @@ write_state() {
     echo "last_break_notified=$last_break_notified"
     echo "warning_7h_sent=$warning_7h_sent"
     echo "limit_8h_sent=$limit_8h_sent"
+    echo "paused=$paused"
   } > "$STATE_FILE"
 }
 
@@ -32,6 +33,7 @@ if [ ! -f "$STATE_FILE" ]; then
   last_break_notified=0
   warning_7h_sent=0
   limit_8h_sent=0
+  paused=0
   write_state
 fi
 
@@ -40,13 +42,25 @@ active_minutes=${active_minutes:-0}
 last_break_notified=${last_break_notified:-0}
 warning_7h_sent=${warning_7h_sent:-0}
 limit_8h_sent=${limit_8h_sent:-0}
+paused=${paused:-0}
+
+# Handle --toggle-pause command
+if [ "${1:-}" = "--toggle-pause" ]; then
+  if [ "$paused" -eq 1 ]; then
+    paused=0
+  else
+    paused=1
+  fi
+  write_state
+  exit 0
+fi
 
 IDLE_TIME=$(ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
 if [ -z "$IDLE_TIME" ]; then
   IDLE_TIME=999999
 fi
 
-if [ "$IDLE_TIME" -lt 90 ]; then
+if [ "$paused" -eq 0 ] && [ "$IDLE_TIME" -lt 90 ]; then
   active_minutes=$((active_minutes + 1))
 
   if [ "$active_minutes" -ge $((last_break_notified + BREAK_THRESHOLD)) ]; then
