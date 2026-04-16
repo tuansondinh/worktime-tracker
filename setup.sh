@@ -8,7 +8,7 @@ LAUNCH_AGENTS_DIR="$HOME/Library/LaunchAgents"
 PLIST_DEST="$LAUNCH_AGENTS_DIR/com.son.worktime.plist"
 LABEL="com.son.worktime"
 
-echo "Setting up Work Time Tracker..."
+echo "Setting up workbar..."
 
 # Install SwiftBar if not already installed
 if ! [ -d "/Applications/SwiftBar.app" ]; then
