@@ -9,6 +9,8 @@ echo "Uninstalling workbar..."
 # Stop and remove launchd agent
 launchctl bootout "gui/$(id -u)/$LABEL" 2>/dev/null || true
 rm -f "$PLIST"
+launchctl bootout "gui/$(id -u)/com.son.worktime.scrollwatch" 2>/dev/null || true
+rm -f "$HOME/Library/LaunchAgents/com.son.worktime.scrollwatch.plist"
 echo "✓ Tracker stopped"
 
 # Remove SwiftBar plugin (search known locations)
@@ -30,6 +32,11 @@ rm -f \
   "$WORKTIME_DIR/worktime.1m.sh" \
   "$WORKTIME_DIR/stats.sh" \
   "$WORKTIME_DIR/setup.sh" \
+  "$WORKTIME_DIR/scroll-sync.sh" \
+  "$WORKTIME_DIR/mouse-watcher.sh" \
+  "$WORKTIME_DIR/scroll_state" \
+  "$WORKTIME_DIR/scrollwatch.log" \
+  "$WORKTIME_DIR/scrollwatch-error.log" \
   "$WORKTIME_DIR/launchd.log" \
   "$WORKTIME_DIR/launchd-error.log" \
   "$WORKTIME_DIR/last_break_notified.txt"

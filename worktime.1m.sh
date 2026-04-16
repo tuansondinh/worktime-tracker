@@ -113,6 +113,11 @@ limit_str="${limit_h}h"
 echo "---"
 echo "Break: ${BREAK_THRESHOLD} min | Daily limit: ${limit_str}"
 
+_sr=$(defaults read com.pilotmoon.scroll-reverser InvertScrollingOn 2>/dev/null || echo "0")
+if [ "$_sr" = "1" ]; then
+  echo "Scroll: 🔄 Reverser on"
+fi
+
 echo "---"
 
 # Settings submenu
@@ -151,3 +156,13 @@ echo "----7h | bash=$HOME/.worktime/worktime param1=config param2=limit param3=4
 echo "----8h | bash=$HOME/.worktime/worktime param1=config param2=limit param3=480 terminal=false refresh=true"
 echo "----9h | bash=$HOME/.worktime/worktime param1=config param2=limit param3=540 terminal=false refresh=true"
 echo "----10h | bash=$HOME/.worktime/worktime param1=config param2=limit param3=600 terminal=false refresh=true"
+echo "-----"
+
+echo "--SCROLL REVERSER | color=#888888"
+echo "--Reverses mouse scroll, keeps trackpad natural | size=11 color=#888888"
+_sr=$(defaults read com.pilotmoon.scroll-reverser InvertScrollingOn 2>/dev/null || echo "0")
+if [ "$_sr" = "1" ]; then
+  echo "--Scroll Reverser: ✓ on | bash=$HOME/.worktime/worktime param1=config param2=scroll param3=off terminal=false refresh=true"
+else
+  echo "--Scroll Reverser: ✗ off | bash=$HOME/.worktime/worktime param1=config param2=scroll param3=on terminal=false refresh=true"
+fi

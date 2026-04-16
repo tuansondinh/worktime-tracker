@@ -46,6 +46,8 @@ case "${1:-}" in
           [ "$_cfg_sound" = "true" ] && echo "  Notification sound: ✓ enabled" || echo "  Notification sound: ✗ disabled"
           echo "  Break time: ${_cfg_break_threshold} min"
           echo "  Daily limit: ${_limit_str}"
+          _sr=$(defaults read com.pilotmoon.scroll-reverser InvertScrollingOn 2>/dev/null || echo "0")
+          [ "$_sr" = "1" ] && echo "  Scroll Reverser: ✓ enabled" || echo "  Scroll Reverser: ✗ disabled"
         else
           echo "No config file found. Using defaults:"
           echo "  Break notifications: ✓ enabled"
@@ -96,8 +98,19 @@ case "${1:-}" in
           echo "Example: worktime config limit 360   # 6 hours"
         fi
         ;;
+      scroll)
+        if [ "${2:-}" = "off" ]; then
+          defaults write com.pilotmoon.scroll-reverser InvertScrollingOn -bool false
+          echo "✓ Scroll Reverser disabled"
+        elif [ "${2:-}" = "on" ]; then
+          defaults write com.pilotmoon.scroll-reverser InvertScrollingOn -bool true
+          echo "✓ Scroll Reverser enabled"
+        else
+          echo "Usage: worktime config scroll [on|off]"
+        fi
+        ;;
       *)
-        echo "Usage: worktime config [show|break|sound|break-time|limit] [value]"
+        echo "Usage: worktime config [show|break|sound|break-time|limit|scroll] [value]"
         echo ""
         echo "Examples:"
         echo "  worktime config show              # Show current settings"
@@ -105,6 +118,7 @@ case "${1:-}" in
         echo "  worktime config sound off         # Disable notification sound"
         echo "  worktime config break-time 45     # Set break interval to 45 min"
         echo "  worktime config limit 360         # Set daily limit to 6h"
+        echo "  worktime config scroll off        # Disable auto scroll sync"
         ;;
     esac
     exit 0
@@ -132,6 +146,7 @@ case "${1:-}" in
     echo "  sound [on|off]        Enable/disable notification sound"
     echo "  break-time <minutes>  Set break interval (default: 60)"
     echo "  limit <minutes>       Set daily limit (default: 480 = 8h)"
+    echo "  scroll [on|off]       Enable/disable auto scroll sync (mouse detection)"
     exit 0
     ;;
 esac

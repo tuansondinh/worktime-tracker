@@ -29,7 +29,8 @@ cp "$TRACKER_DIR/track.sh" "$WORKTIME_DIR/"
 cp "$TRACKER_DIR/worktime" "$WORKTIME_DIR/"
 cp "$TRACKER_DIR/worktime.1m.sh" "$WORKTIME_DIR/"
 cp "$TRACKER_DIR/stats.sh" "$WORKTIME_DIR/"
-chmod +x "$WORKTIME_DIR/track.sh" "$WORKTIME_DIR/worktime" "$WORKTIME_DIR/worktime.1m.sh" "$WORKTIME_DIR/stats.sh"
+chmod +x "$WORKTIME_DIR/track.sh" "$WORKTIME_DIR/worktime" "$WORKTIME_DIR/worktime.1m.sh" \
+         "$WORKTIME_DIR/stats.sh"
 echo "✓ Installed scripts to ~/.worktime/"
 
 # Write default config only on fresh install (don't overwrite existing user settings)
@@ -42,10 +43,36 @@ HOME_ESCAPED=$(printf '%s\n' "$HOME" | sed 's/[\/&]/\\&/g')
 sed "s#__HOME__#$HOME_ESCAPED#g" "$PLIST_TEMPLATE" > "$PLIST_DEST"
 echo "✓ Installed launchd agent"
 
+# Stop old mouse-watcher daemon if present from a previous install
+launchctl bootout "gui/$(id -u)/com.son.worktime.scrollwatch" >/dev/null 2>&1 || true
+rm -f "$LAUNCH_AGENTS_DIR/com.son.worktime.scrollwatch.plist"
+
 launchctl bootout "gui/$(id -u)/$LABEL" >/dev/null 2>&1 || true
 launchctl bootstrap "gui/$(id -u)" "$PLIST_DEST"
 launchctl kickstart -k "gui/$(id -u)/$LABEL"
 echo "✓ Tracker started"
+
+# Install and configure Scroll Reverser
+if ! [ -d "/Applications/Scroll Reverser.app" ]; then
+  if command -v brew >/dev/null 2>&1; then
+    echo "Installing Scroll Reverser..."
+    brew install --cask scroll-reverser
+    echo "✓ Scroll Reverser installed"
+  else
+    echo "  Homebrew not found — install Scroll Reverser manually: https://pilotmoon.com/scrollreverser/"
+  fi
+else
+  echo "✓ Scroll Reverser already installed"
+fi
+defaults write com.pilotmoon.scroll-reverser InvertScrollingOn -bool true
+defaults write com.pilotmoon.scroll-reverser ReverseY           -bool true
+defaults write com.pilotmoon.scroll-reverser ReverseX           -bool false
+defaults write com.pilotmoon.scroll-reverser ReverseMouse       -bool true
+defaults write com.pilotmoon.scroll-reverser ReverseTrackpad    -bool false
+defaults write -g com.apple.swipescrolldirection -bool true
+open -a "Scroll Reverser" 2>/dev/null || true
+echo "✓ Scroll Reverser configured (mouse reversed, trackpad natural)"
+echo "  If scroll reversal isn't working: System Settings → Privacy → Accessibility → enable Scroll Reverser"
 
 # Set up SwiftBar plugins folder and link plugin
 SWIFTBAR_PLUGIN_DIR=""
