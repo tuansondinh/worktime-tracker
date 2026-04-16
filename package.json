@@ -6,7 +6,8 @@
     "darwin"
   ],
   "scripts": {
-    "postinstall": "bash setup.sh"
+    "postinstall": "bash setup.sh",
+    "preuninstall": "bash uninstall.sh"
   },
   "bin": {
     "worktime": "worktime"
@@ -14,6 +15,7 @@
   "files": [
     "track.sh",
     "setup.sh",
+    "uninstall.sh",
     "stats.sh",
     "worktime",
     "worktime.1m.sh",

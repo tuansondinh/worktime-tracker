@@ -62,8 +62,7 @@ Settings are stored in `~/.worktime/config.json`.
 ## Uninstall
 
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.son.worktime.plist
-rm -rf ~/.worktime
-rm ~/Library/LaunchAgents/com.son.worktime.plist
-npm uninstall -g worktime-tracker
+npm uninstall -g workbar
 ```
+
+This stops the tracker, removes the SwiftBar plugin, and cleans up all files. Your daily stats logs in `~/.worktime/` are preserved.
