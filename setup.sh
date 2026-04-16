@@ -66,13 +66,15 @@ if [ -z "$SWIFTBAR_PLUGIN_DIR" ]; then
   done
 fi
 
-# No folder found — create default and configure SwiftBar to use it
+# No folder found — create default
 if [ -z "$SWIFTBAR_PLUGIN_DIR" ]; then
   SWIFTBAR_PLUGIN_DIR="$HOME/SwiftBar"
   mkdir -p "$SWIFTBAR_PLUGIN_DIR"
-  defaults write com.ameba.SwiftBar PluginDirectory "$SWIFTBAR_PLUGIN_DIR"
   echo "✓ SwiftBar plugins folder created at ~/SwiftBar"
 fi
+
+# Always ensure SwiftBar knows which folder to use
+defaults write com.ameba.SwiftBar PluginDirectory "$SWIFTBAR_PLUGIN_DIR"
 
 rm -rf "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
 ln -sf "$WORKTIME_DIR/worktime.1m.sh" "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
