@@ -1,7 +1,7 @@
 {
-  "name": "@tuan_son.dinh/worktime-tracker",
+  "name": "workbar",
   "version": "1.3.0",
-  "description": "macOS idle-aware work time tracker with 8h daily limit, break reminders, and SwiftBar support",
+  "description": "macOS menu bar work time tracker with break reminders, daily limit, away mode, and SwiftBar support",
   "os": [
     "darwin"
   ],

@@ -5,7 +5,7 @@ Track active macOS laptop usage with break reminders, a configurable daily limit
 ## Install
 
 ```bash
-npm install -g @tuan_son.dinh/worktime-tracker
+npm install -g workbar
 ```
 
 That's it. SwiftBar and the tracker are installed automatically. Your active work time appears in the menu bar, updated every minute.
