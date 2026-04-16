@@ -33,13 +33,16 @@ if [ -f "$STATE_DIR/config.json" ]; then
 fi
 
 paused=${paused:-0}
+away_mode=${away_mode:-0}
 
 # Format active time
 hours=$((active_minutes / 60))
 mins=$((active_minutes % 60))
 
 # Colors based on thresholds
-if [ "$paused" -eq 1 ]; then
+if [ "$away_mode" -eq 1 ]; then
+  color="🟠"  # Orange for away mode
+elif [ "$paused" -eq 1 ]; then
   color="⏸"  # Paused
 elif [ $active_minutes -ge $LIMIT_8H ]; then
   color="🔴"  # Red for limit
@@ -57,24 +60,31 @@ echo "---"
 echo "Today: ${hours}h ${mins}m  (${active_minutes} min worked)"
 echo "---"
 
-if [ "$paused" -eq 1 ]; then
+if [ "$away_mode" -eq 1 ]; then
+  echo "Status: 🟠 Away mode  (not counting)"
+  echo "⏹ Stop away mode | bash=$HOME/.worktime/track.sh param1=--toggle-away terminal=false refresh=true"
+elif [ "$paused" -eq 1 ]; then
   echo "Status: ⏸ Tracking paused"
   echo "▶ Resume | bash=$HOME/.worktime/track.sh param1=--toggle-pause terminal=false refresh=true"
 elif [ $active_minutes -ge $LIMIT_8H ]; then
   echo "Status: 🛑 Daily limit reached"
   echo "⏸ Pause | bash=$HOME/.worktime/track.sh param1=--toggle-pause terminal=false refresh=true"
+  echo "🟠 Away mode | bash=$HOME/.worktime/track.sh param1=--toggle-away terminal=false refresh=true"
 elif [ $active_minutes -ge $WARNING_7H ]; then
   remaining_limit=$((LIMIT_8H - active_minutes))
   echo "Status: ⚠️  1 hour left  (${remaining_limit} min to limit)"
   echo "⏸ Pause | bash=$HOME/.worktime/track.sh param1=--toggle-pause terminal=false refresh=true"
+  echo "🟠 Away mode | bash=$HOME/.worktime/track.sh param1=--toggle-away terminal=false refresh=true"
 elif [ $active_minutes -ge $BREAK_THRESHOLD ]; then
   echo "Status: ☕ Time for a break!"
   echo "⏸ Pause | bash=$HOME/.worktime/track.sh param1=--toggle-pause terminal=false refresh=true"
+  echo "🟠 Away mode | bash=$HOME/.worktime/track.sh param1=--toggle-away terminal=false refresh=true"
 else
   mins_to_break=$((BREAK_THRESHOLD - active_minutes))
   echo "Status: ✓ On track"
   echo "Next break in: ${mins_to_break} min"
   echo "⏸ Pause | bash=$HOME/.worktime/track.sh param1=--toggle-pause terminal=false refresh=true"
+  echo "🟠 Away mode | bash=$HOME/.worktime/track.sh param1=--toggle-away terminal=false refresh=true"
 fi
 
 if [ $active_minutes -lt $LIMIT_8H ]; then

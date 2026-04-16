@@ -20,6 +20,7 @@ That's it. SwiftBar and the tracker are installed automatically. Your active wor
 - **1h warning**: Notification when 1 hour remains before your limit
 - **Break reminders**: Configurable interval (default 60 min)
 - **Pause/resume**: Pause tracking from the menu bar
+- **Away mode**: Keeps Mac awake (via `caffeinate`) without counting work time — useful during meetings or calls. Icon turns 🟠 orange.
 - **Settings menu**: Configure everything directly from the menu bar
 
 ## Usage

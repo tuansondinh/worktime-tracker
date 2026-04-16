@@ -18,6 +18,7 @@ write_state() {
     echo "warning_7h_sent=$warning_7h_sent"
     echo "limit_8h_sent=$limit_8h_sent"
     echo "paused=$paused"
+    echo "away_mode=$away_mode"
   } > "$STATE_FILE"
 }
 
@@ -64,6 +65,7 @@ if [ ! -f "$STATE_FILE" ]; then
   warning_7h_sent=0
   limit_8h_sent=0
   paused=0
+  away_mode=0
   write_state
 fi
 
@@ -74,6 +76,7 @@ last_break_notified=${last_break_notified:-0}
 warning_7h_sent=${warning_7h_sent:-0}
 limit_8h_sent=${limit_8h_sent:-0}
 paused=${paused:-0}
+away_mode=${away_mode:-0}
 
 # Handle --toggle-pause command
 if [ "${1:-}" = "--toggle-pause" ]; then
@@ -81,6 +84,19 @@ if [ "${1:-}" = "--toggle-pause" ]; then
     paused=0
   else
     paused=1
+    away_mode=0  # cancel away mode when pausing
+  fi
+  write_state
+  exit 0
+fi
+
+# Handle --toggle-away command
+if [ "${1:-}" = "--toggle-away" ]; then
+  if [ "$away_mode" -eq 1 ]; then
+    away_mode=0
+  else
+    away_mode=1
+    paused=0  # cancel pause when enabling away mode
   fi
   write_state
   exit 0
@@ -89,6 +105,14 @@ fi
 IDLE_TIME=$(ioreg -c IOHIDSystem | awk '/HIDIdleTime/ {print int($NF/1000000000); exit}')
 if [ -z "$IDLE_TIME" ]; then
   IDLE_TIME=999999
+fi
+
+# Away mode: keep system active but don't count work time
+if [ "$away_mode" -eq 1 ]; then
+  caffeinate -u -t 2  # briefly declare user activity to reset system idle timer
+  write_state
+  echo "[$(date +'%H:%M:%S')] Away mode | Active: $active_minutes min"
+  exit 0
 fi
 
 if [ "$paused" -eq 0 ] && [ "$IDLE_TIME" -lt 90 ]; then
