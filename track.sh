@@ -25,15 +25,16 @@ load_config() {
   if [ -f "$STATE_DIR/config.json" ]; then
     enable_break_notifications=$(grep -o '"enable_break_notifications": *\(true\|false\)' "$STATE_DIR/config.json" | grep -o '\(true\|false\)' || echo "true")
     enable_notification_sound=$(grep -o '"enable_notification_sound": *\(true\|false\)' "$STATE_DIR/config.json" | grep -o '\(true\|false\)' || echo "true")
-    break_threshold_cfg=$(grep -o '"break_threshold": *[0-9]*' "$STATE_DIR/config.json" | grep -o '[0-9]*' || echo "")
+    _v=$(grep -o '"break_threshold": *[0-9]*' "$STATE_DIR/config.json" | grep -o '[0-9]*')
+    [ -n "$_v" ] && BREAK_THRESHOLD=$_v
+    _v=$(grep -o '"daily_limit": *[0-9]*' "$STATE_DIR/config.json" | grep -o '[0-9]*')
+    if [ -n "$_v" ]; then
+      LIMIT_8H=$_v
+      WARNING_7H=$(( LIMIT_8H - 60 ))
+    fi
   else
     enable_break_notifications="true"
     enable_notification_sound="true"
-    break_threshold_cfg=""
-  fi
-  # Override BREAK_THRESHOLD only if set in config
-  if [ -n "$break_threshold_cfg" ]; then
-    BREAK_THRESHOLD=$break_threshold_cfg
   fi
 }
 

@@ -1,6 +1,6 @@
 # Work Time Tracker
 
-Track active macOS laptop usage, cap at 8h/day with break reminders and warnings.
+Track active macOS laptop usage with break reminders, a configurable daily limit, and a SwiftBar menu bar widget.
 
 ## Install
 
@@ -16,10 +16,11 @@ That's it. SwiftBar and the tracker are installed automatically. Your active wor
 
 - **Menu bar widget**: Live time display via SwiftBar, updated every minute
 - **Idle-aware tracking**: Only counts time when laptop is in use (idle < 90s)
-- **Daily 8h limit**: Soft lock via display sleep at 8h
+- **Configurable daily limit**: Display sleeps when you hit your limit (default 8h)
+- **1h warning**: Notification when 1 hour remains before your limit
 - **Break reminders**: Configurable interval (default 60 min)
-- **7h warning**: "1 hour left today" notification
 - **Pause/resume**: Pause tracking from the menu bar
+- **Settings menu**: Configure everything directly from the menu bar
 
 ## Usage
 
@@ -41,6 +42,13 @@ worktime config show                 # show current settings
 worktime config break on|off         # enable/disable break notifications
 worktime config sound on|off         # enable/disable notification sound
 worktime config break-time <minutes> # set break interval (default: 60)
+worktime config limit <minutes>      # set daily limit (default: 480 = 8h)
+```
+
+Examples:
+```bash
+worktime config break-time 75   # break reminder every 75 min
+worktime config limit 360       # stop at 6h
 ```
 
 Settings are stored in `~/.worktime/config.json`.

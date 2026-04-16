@@ -34,7 +34,7 @@ echo "✓ Installed scripts to ~/.worktime/"
 
 # Write default config only on fresh install (don't overwrite existing user settings)
 if [ ! -f "$WORKTIME_DIR/config.json" ]; then
-  printf '{"enable_break_notifications": true, "enable_notification_sound": true, "break_threshold": 60}\n' > "$WORKTIME_DIR/config.json"
+  printf '{"enable_break_notifications": true, "enable_notification_sound": true, "break_threshold": 60, "daily_limit": 480}\n' > "$WORKTIME_DIR/config.json"
   echo "✓ Created default config"
 fi
 
@@ -74,6 +74,7 @@ if [ -z "$SWIFTBAR_PLUGIN_DIR" ]; then
   echo "✓ SwiftBar plugins folder created at ~/SwiftBar"
 fi
 
+rm -f "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
 ln -sf "$WORKTIME_DIR/worktime.1m.sh" "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
 echo "✓ SwiftBar plugin linked to $SWIFTBAR_PLUGIN_DIR"
 
