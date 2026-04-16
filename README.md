@@ -17,8 +17,9 @@ That's it. SwiftBar and the tracker are installed automatically. Your active wor
 - **Menu bar widget**: Live time display via SwiftBar, updated every minute
 - **Idle-aware tracking**: Only counts time when laptop is in use (idle < 90s)
 - **Daily 8h limit**: Soft lock via display sleep at 8h
-- **Break reminders**: Every 60 active minutes
+- **Break reminders**: Configurable interval (default 60 min)
 - **7h warning**: "1 hour left today" notification
+- **Pause/resume**: Pause tracking from the menu bar
 
 ## Usage
 
@@ -30,6 +31,19 @@ worktime stats --month
 worktime stats --all
 worktime stats --json
 ```
+
+## Settings
+
+Configure from the menu bar (**Settings** at the bottom of the dropdown) or via CLI:
+
+```bash
+worktime config show                 # show current settings
+worktime config break on|off         # enable/disable break notifications
+worktime config sound on|off         # enable/disable notification sound
+worktime config break-time <minutes> # set break interval (default: 60)
+```
+
+Settings are stored in `~/.worktime/config.json`.
 
 ## Requirements
 
