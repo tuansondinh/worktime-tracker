@@ -74,7 +74,7 @@ if [ -z "$SWIFTBAR_PLUGIN_DIR" ]; then
   echo "✓ SwiftBar plugins folder created at ~/SwiftBar"
 fi
 
-rm -f "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
+rm -rf "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
 ln -sf "$WORKTIME_DIR/worktime.1m.sh" "$SWIFTBAR_PLUGIN_DIR/worktime.1m.sh"
 echo "✓ SwiftBar plugin linked to $SWIFTBAR_PLUGIN_DIR"
 
