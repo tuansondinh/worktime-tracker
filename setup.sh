@@ -32,6 +32,12 @@ cp "$TRACKER_DIR/stats.sh" "$WORKTIME_DIR/"
 chmod +x "$WORKTIME_DIR/track.sh" "$WORKTIME_DIR/worktime" "$WORKTIME_DIR/worktime.1m.sh" "$WORKTIME_DIR/stats.sh"
 echo "✓ Installed scripts to ~/.worktime/"
 
+# Write default config only on fresh install (don't overwrite existing user settings)
+if [ ! -f "$WORKTIME_DIR/config.json" ]; then
+  printf '{"enable_break_notifications": true, "enable_notification_sound": true, "break_threshold": 60}\n' > "$WORKTIME_DIR/config.json"
+  echo "✓ Created default config"
+fi
+
 HOME_ESCAPED=$(printf '%s\n' "$HOME" | sed 's/[\/&]/\\&/g')
 sed "s#__HOME__#$HOME_ESCAPED#g" "$PLIST_TEMPLATE" > "$PLIST_DEST"
 echo "✓ Installed launchd agent"

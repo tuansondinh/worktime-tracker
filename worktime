@@ -8,12 +8,94 @@ case "${1:-}" in
     shift
     exec "$HOME/.worktime/stats.sh" "$@"
     ;;
+  config)
+    shift
+    CONFIG_FILE="$STATE_DIR/config.json"
+
+    # Load current config values (defaults if file missing or field absent)
+    _cfg_break_notif="true"
+    _cfg_sound="true"
+    _cfg_break_threshold=60
+    if [ -f "$CONFIG_FILE" ]; then
+      _v=$(grep -o '"enable_break_notifications": *\(true\|false\)' "$CONFIG_FILE" | grep -o '\(true\|false\)')
+      [ -n "$_v" ] && _cfg_break_notif="$_v"
+      _v=$(grep -o '"enable_notification_sound": *\(true\|false\)' "$CONFIG_FILE" | grep -o '\(true\|false\)')
+      [ -n "$_v" ] && _cfg_sound="$_v"
+      _v=$(grep -o '"break_threshold": *[0-9]*' "$CONFIG_FILE" | grep -o '[0-9]*')
+      [ -n "$_v" ] && _cfg_break_threshold="$_v"
+    fi
+
+    # Write full config with all fields
+    write_config() {
+      mkdir -p "$STATE_DIR"
+      printf '{"enable_break_notifications": %s, "enable_notification_sound": %s, "break_threshold": %s}\n' \
+        "$_cfg_break_notif" "$_cfg_sound" "$_cfg_break_threshold" > "$CONFIG_FILE"
+    }
+
+    case "${1:-}" in
+      show|"")
+        if [ -f "$CONFIG_FILE" ]; then
+          echo "Settings:"
+          [ "$_cfg_break_notif" = "true" ] && echo "  Break notifications: ✓ enabled" || echo "  Break notifications: ✗ disabled"
+          [ "$_cfg_sound" = "true" ] && echo "  Notification sound: ✓ enabled" || echo "  Notification sound: ✗ disabled"
+          echo "  Break time: ${_cfg_break_threshold} min"
+        else
+          echo "No config file found. Using defaults:"
+          echo "  Break notifications: ✓ enabled"
+          echo "  Notification sound: ✓ enabled"
+          echo "  Break time: 60 min"
+        fi
+        ;;
+      break)
+        if [ "${2:-}" = "off" ]; then
+          _cfg_break_notif="false"; write_config
+          echo "✓ Break notifications disabled"
+        elif [ "${2:-}" = "on" ]; then
+          _cfg_break_notif="true"; write_config
+          echo "✓ Break notifications enabled"
+        else
+          echo "Usage: worktime config break [on|off]"
+        fi
+        ;;
+      sound)
+        if [ "${2:-}" = "off" ]; then
+          _cfg_sound="false"; write_config
+          echo "✓ Notification sound disabled"
+        elif [ "${2:-}" = "on" ]; then
+          _cfg_sound="true"; write_config
+          echo "✓ Notification sound enabled"
+        else
+          echo "Usage: worktime config sound [on|off]"
+        fi
+        ;;
+      break-time)
+        if [ -n "${2:-}" ] && [[ "${2}" =~ ^[0-9]+$ ]]; then
+          _cfg_break_threshold="${2}"; write_config
+          echo "✓ Break time set to ${2} min"
+        else
+          echo "Usage: worktime config break-time <minutes>"
+          echo "Example: worktime config break-time 45"
+        fi
+        ;;
+      *)
+        echo "Usage: worktime config [show|break|sound|break-time] [value]"
+        echo ""
+        echo "Examples:"
+        echo "  worktime config show              # Show current settings"
+        echo "  worktime config break off         # Disable break notifications"
+        echo "  worktime config sound off         # Disable notification sound"
+        echo "  worktime config break-time 45     # Set break interval to 45 min"
+        ;;
+    esac
+    exit 0
+    ;;
   --help|-h|"help")
     echo "Usage: worktime [command] [options]"
     echo ""
     echo "Commands:"
     echo "  (default)    Show today's active time"
     echo "  stats        Show usage statistics"
+    echo "  config       Manage notifications and settings"
     echo ""
     echo "Options (default command):"
     echo "  --verbose    Show detailed status"
@@ -23,6 +105,12 @@ case "${1:-}" in
     echo "  --month      This month's stats"
     echo "  --all        All-time stats"
     echo "  --json       Output as JSON"
+    echo ""
+    echo "Options (config):"
+    echo "  show                  Show current settings"
+    echo "  break [on|off]        Enable/disable break notifications"
+    echo "  sound [on|off]        Enable/disable notification sound"
+    echo "  break-time <minutes>  Set break interval (default: 60)"
     exit 0
     ;;
 esac
