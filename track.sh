@@ -8,6 +8,7 @@ STATE_FILE="$STATE_DIR/$TODAY.log"
 BREAK_THRESHOLD=60
 WARNING_7H=420
 LIMIT_8H=480
+AFK_BREAK_THRESHOLD=5
 
 mkdir -p "$STATE_DIR"
 
@@ -19,6 +20,7 @@ write_state() {
     echo "limit_8h_sent=$limit_8h_sent"
     echo "paused=$paused"
     echo "away_mode=$away_mode"
+    echo "consecutive_afk_minutes=$consecutive_afk_minutes"
   } > "$STATE_FILE"
 }
 
@@ -33,6 +35,8 @@ load_config() {
       LIMIT_8H=$_v
       WARNING_7H=$(( LIMIT_8H - 60 ))
     fi
+    _v=$(grep -o '"afk_break_threshold": *[0-9]*' "$STATE_DIR/config.json" | grep -o '[0-9]*')
+    [ -n "$_v" ] && AFK_BREAK_THRESHOLD=$_v
   else
     enable_break_notifications="true"
     enable_notification_sound="true"
@@ -66,6 +70,7 @@ if [ ! -f "$STATE_FILE" ]; then
   limit_8h_sent=0
   paused=0
   away_mode=0
+  consecutive_afk_minutes=0
   write_state
 fi
 
@@ -77,6 +82,7 @@ warning_7h_sent=${warning_7h_sent:-0}
 limit_8h_sent=${limit_8h_sent:-0}
 paused=${paused:-0}
 away_mode=${away_mode:-0}
+consecutive_afk_minutes=${consecutive_afk_minutes:-0}
 
 # Handle --toggle-pause command
 if [ "${1:-}" = "--toggle-pause" ]; then
@@ -116,6 +122,7 @@ if [ "$away_mode" -eq 1 ]; then
 fi
 
 if [ "$paused" -eq 0 ] && [ "$IDLE_TIME" -lt 90 ]; then
+  consecutive_afk_minutes=0
   active_minutes=$((active_minutes + 1))
 
   if [ "$active_minutes" -ge $((last_break_notified + BREAK_THRESHOLD)) ]; then
@@ -134,6 +141,12 @@ if [ "$paused" -eq 0 ] && [ "$IDLE_TIME" -lt 90 ]; then
     pmset displaysleepnow
   fi
 
+  write_state
+elif [ "$paused" -eq 0 ]; then
+  consecutive_afk_minutes=$((consecutive_afk_minutes + 1))
+  if [ "$consecutive_afk_minutes" -eq "$AFK_BREAK_THRESHOLD" ]; then
+    last_break_notified=$active_minutes
+  fi
   write_state
 fi
 

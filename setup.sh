@@ -35,7 +35,7 @@ echo "✓ Installed scripts to ~/.worktime/"
 
 # Write default config only on fresh install (don't overwrite existing user settings)
 if [ ! -f "$WORKTIME_DIR/config.json" ]; then
-  printf '{"enable_break_notifications": true, "enable_notification_sound": true, "break_threshold": 60, "daily_limit": 480}\n' > "$WORKTIME_DIR/config.json"
+  printf '{"enable_break_notifications": true, "enable_notification_sound": true, "break_threshold": 60, "daily_limit": 480, "afk_break_threshold": 5}\n' > "$WORKTIME_DIR/config.json"
   echo "✓ Created default config"
 fi
 

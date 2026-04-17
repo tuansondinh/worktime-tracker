@@ -17,6 +17,7 @@ case "${1:-}" in
     _cfg_sound="true"
     _cfg_break_threshold=60
     _cfg_daily_limit=480
+    _cfg_afk_break=5
     if [ -f "$CONFIG_FILE" ]; then
       _v=$(grep -o '"enable_break_notifications": *\(true\|false\)' "$CONFIG_FILE" | grep -o '\(true\|false\)')
       [ -n "$_v" ] && _cfg_break_notif="$_v"
@@ -26,13 +27,15 @@ case "${1:-}" in
       [ -n "$_v" ] && _cfg_break_threshold="$_v"
       _v=$(grep -o '"daily_limit": *[0-9]*' "$CONFIG_FILE" | grep -o '[0-9]*')
       [ -n "$_v" ] && _cfg_daily_limit="$_v"
+      _v=$(grep -o '"afk_break_threshold": *[0-9]*' "$CONFIG_FILE" | grep -o '[0-9]*')
+      [ -n "$_v" ] && _cfg_afk_break="$_v"
     fi
 
     # Write full config with all fields
     write_config() {
       mkdir -p "$STATE_DIR"
-      printf '{"enable_break_notifications": %s, "enable_notification_sound": %s, "break_threshold": %s, "daily_limit": %s}\n' \
-        "$_cfg_break_notif" "$_cfg_sound" "$_cfg_break_threshold" "$_cfg_daily_limit" > "$CONFIG_FILE"
+      printf '{"enable_break_notifications": %s, "enable_notification_sound": %s, "break_threshold": %s, "daily_limit": %s, "afk_break_threshold": %s}\n' \
+        "$_cfg_break_notif" "$_cfg_sound" "$_cfg_break_threshold" "$_cfg_daily_limit" "$_cfg_afk_break" > "$CONFIG_FILE"
     }
 
     case "${1:-}" in
@@ -44,7 +47,8 @@ case "${1:-}" in
           echo "Settings:"
           [ "$_cfg_break_notif" = "true" ] && echo "  Break notifications: ✓ enabled" || echo "  Break notifications: ✗ disabled"
           [ "$_cfg_sound" = "true" ] && echo "  Notification sound: ✓ enabled" || echo "  Notification sound: ✗ disabled"
-          echo "  Break time: ${_cfg_break_threshold} min"
+          echo "  Break interval: ${_cfg_break_threshold} min"
+          echo "  AFK break threshold: ${_cfg_afk_break} min"
           echo "  Daily limit: ${_limit_str}"
           _sr=$(defaults read com.pilotmoon.scroll-reverser InvertScrollingOn 2>/dev/null || echo "0")
           [ "$_sr" = "1" ] && echo "  Scroll Reverser: ✓ enabled" || echo "  Scroll Reverser: ✗ disabled"
@@ -52,7 +56,8 @@ case "${1:-}" in
           echo "No config file found. Using defaults:"
           echo "  Break notifications: ✓ enabled"
           echo "  Notification sound: ✓ enabled"
-          echo "  Break time: 60 min"
+          echo "  Break interval: 60 min"
+          echo "  AFK break threshold: 5 min"
           echo "  Daily limit: 8h"
         fi
         ;;
@@ -81,10 +86,19 @@ case "${1:-}" in
       break-time)
         if [ -n "${2:-}" ] && [[ "${2}" =~ ^[0-9]+$ ]]; then
           _cfg_break_threshold="${2}"; write_config
-          echo "✓ Break time set to ${2} min"
+          echo "✓ Break interval set to ${2} min"
         else
           echo "Usage: worktime config break-time <minutes>"
           echo "Example: worktime config break-time 45"
+        fi
+        ;;
+      afk-break)
+        if [ -n "${2:-}" ] && [[ "${2}" =~ ^[0-9]+$ ]]; then
+          _cfg_afk_break="${2}"; write_config
+          echo "✓ AFK break threshold set to ${2} min"
+        else
+          echo "Usage: worktime config afk-break <minutes>"
+          echo "Example: worktime config afk-break 5"
         fi
         ;;
       limit)
@@ -110,13 +124,14 @@ case "${1:-}" in
         fi
         ;;
       *)
-        echo "Usage: worktime config [show|break|sound|break-time|limit|scroll] [value]"
+        echo "Usage: worktime config [show|break|sound|break-time|afk-break|limit|scroll] [value]"
         echo ""
         echo "Examples:"
         echo "  worktime config show              # Show current settings"
         echo "  worktime config break off         # Disable break notifications"
         echo "  worktime config sound off         # Disable notification sound"
         echo "  worktime config break-time 45     # Set break interval to 45 min"
+        echo "  worktime config afk-break 5       # AFK minutes that count as a break"
         echo "  worktime config limit 360         # Set daily limit to 6h"
         echo "  worktime config scroll off        # Disable auto scroll sync"
         ;;
@@ -144,7 +159,8 @@ case "${1:-}" in
     echo "  show                  Show current settings"
     echo "  break [on|off]        Enable/disable break notifications"
     echo "  sound [on|off]        Enable/disable notification sound"
-    echo "  break-time <minutes>  Set break interval (default: 60)"
+    echo "  break-time <minutes>  Set break interval (default: 60)
+  afk-break <minutes>   AFK minutes that count as a break (default: 5)"
     echo "  limit <minutes>       Set daily limit (default: 480 = 8h)"
     echo "  scroll [on|off]       Enable/disable auto scroll sync (mouse detection)"
     exit 0

@@ -14,6 +14,7 @@ source "$STATE_FILE"
 BREAK_THRESHOLD=60
 WARNING_7H=420
 LIMIT_8H=480
+AFK_BREAK_THRESHOLD=5
 
 # Load user config overrides
 cfg_break_notif="true"
@@ -30,6 +31,8 @@ if [ -f "$STATE_DIR/config.json" ]; then
   [ -n "$_v" ] && cfg_break_notif="$_v"
   _v=$(grep -o '"enable_notification_sound": *\(true\|false\)' "$STATE_DIR/config.json" | grep -o '\(true\|false\)')
   [ -n "$_v" ] && cfg_sound="$_v"
+  _v=$(grep -o '"afk_break_threshold": *[0-9]*' "$STATE_DIR/config.json" | grep -o '[0-9]*')
+  [ -n "$_v" ] && AFK_BREAK_THRESHOLD=$_v
 fi
 
 paused=${paused:-0}
@@ -146,6 +149,15 @@ echo "----60 min | bash=$HOME/.worktime/worktime param1=config param2=break-time
 echo "----75 min | bash=$HOME/.worktime/worktime param1=config param2=break-time param3=75 terminal=false refresh=true"
 echo "----90 min | bash=$HOME/.worktime/worktime param1=config param2=break-time param3=90 terminal=false refresh=true"
 echo "----120 min | bash=$HOME/.worktime/worktime param1=config param2=break-time param3=120 terminal=false refresh=true"
+echo "-----"
+echo "--AFK break: ${AFK_BREAK_THRESHOLD} min | dropdown=false"
+echo "--AFK this long = break taken, resets notification timer | size=11 color=#888888"
+echo "----5 min | bash=$HOME/.worktime/worktime param1=config param2=afk-break param3=5 terminal=false refresh=true"
+echo "----10 min | bash=$HOME/.worktime/worktime param1=config param2=afk-break param3=10 terminal=false refresh=true"
+echo "----15 min | bash=$HOME/.worktime/worktime param1=config param2=afk-break param3=15 terminal=false refresh=true"
+echo "----20 min | bash=$HOME/.worktime/worktime param1=config param2=afk-break param3=20 terminal=false refresh=true"
+echo "----25 min | bash=$HOME/.worktime/worktime param1=config param2=afk-break param3=25 terminal=false refresh=true"
+echo "----30 min | bash=$HOME/.worktime/worktime param1=config param2=afk-break param3=30 terminal=false refresh=true"
 echo "-----"
 echo "--Daily limit: ${limit_str} | dropdown=false"
 echo "--Display sleeps when you hit this limit | size=11 color=#888888"
