@@ -100,11 +100,11 @@ fi
 echo "---"
 
 # Weekly stats
-STATS_JSON=$(bash "$HOME/.local/bin/stats.sh" --week --json 2>/dev/null)
+STATS_JSON=$(bash "$HOME/.worktime/stats.sh" --week --json 2>/dev/null)
 if [ $? -eq 0 ] && [ -n "$STATS_JSON" ]; then
-  week_total=$(echo "$STATS_JSON" | grep -o '"total_hours":"[^"]*"' | cut -d'"' -f4)
-  week_days=$(echo "$STATS_JSON" | grep -o '"working_days":[0-9]*' | cut -d':' -f2)
-  week_avg=$(echo "$STATS_JSON" | grep -o '"avg_per_day":"[^"]*"' | cut -d'"' -f4)
+  week_total=$(echo "$STATS_JSON" | grep -o '"total_hours": *"[^"]*"' | grep -o '"[^"]*"$' | tr -d '"')
+  week_days=$(echo "$STATS_JSON" | grep -o '"working_days": *[0-9]*' | grep -o '[0-9]*$')
+  week_avg=$(echo "$STATS_JSON" | grep -o '"avg_per_day": *"[^"]*"' | grep -o '"[^"]*"$' | tr -d '"')
   echo "This Week: ${week_total}  (${week_days} days, avg ${week_avg})"
 fi
 
