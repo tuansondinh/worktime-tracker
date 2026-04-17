@@ -114,7 +114,7 @@ limit_str="${limit_h}h"
 [ "$limit_m" -gt 0 ] && limit_str="${limit_h}h ${limit_m}m"
 
 echo "---"
-echo "Break interval: ${BREAK_THRESHOLD} min  |  AFK break: ${AFK_BREAK_THRESHOLD} min  |  Limit: ${limit_str}"
+echo "Break interval: ${BREAK_THRESHOLD} min  ·  AFK break: ${AFK_BREAK_THRESHOLD} min  ·  Limit: ${limit_str}"
 echo "---"
 
 # Settings submenu

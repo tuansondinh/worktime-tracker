@@ -1,6 +1,6 @@
 {
   "name": "workbar",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "macOS menu bar work time tracker with break reminders, daily limit, away mode, and SwiftBar support",
   "os": [
     "darwin"
