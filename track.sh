@@ -21,6 +21,7 @@ write_state() {
     echo "paused=$paused"
     echo "away_mode=$away_mode"
     echo "consecutive_afk_minutes=$consecutive_afk_minutes"
+    echo "last_run_timestamp=$current_timestamp"
   } > "$STATE_FILE"
 }
 
@@ -63,6 +64,8 @@ notify() {
   }
 }
 
+current_timestamp=$(date +%s)
+
 if [ ! -f "$STATE_FILE" ]; then
   active_minutes=0
   last_break_notified=0
@@ -71,6 +74,7 @@ if [ ! -f "$STATE_FILE" ]; then
   paused=0
   away_mode=0
   consecutive_afk_minutes=0
+  last_run_timestamp=0
   write_state
 fi
 
@@ -83,6 +87,22 @@ limit_8h_sent=${limit_8h_sent:-0}
 paused=${paused:-0}
 away_mode=${away_mode:-0}
 consecutive_afk_minutes=${consecutive_afk_minutes:-0}
+last_run_timestamp=${last_run_timestamp:-0}
+
+# Compute elapsed seconds since the script last ran.
+# A large gap means the Mac was asleep — treat it as a break.
+# Default to 60 (normal interval) so a missing timestamp is treated as a regular run.
+elapsed_since_last_run=60
+if [ "$last_run_timestamp" -gt 0 ] 2>/dev/null; then
+  elapsed_since_last_run=$(( current_timestamp - last_run_timestamp ))
+fi
+
+# If the Mac was asleep (or idle) long enough to count as a break,
+# reset the break timer so the user gets a full interval before the next notification.
+if [ "$elapsed_since_last_run" -ge $(( AFK_BREAK_THRESHOLD * 60 )) ]; then
+  last_break_notified=$active_minutes
+  consecutive_afk_minutes=0
+fi
 
 # Handle --toggle-pause command
 if [ "${1:-}" = "--toggle-pause" ]; then
@@ -123,7 +143,11 @@ fi
 
 if [ "$paused" -eq 0 ] && [ "$IDLE_TIME" -lt 90 ]; then
   consecutive_afk_minutes=0
-  active_minutes=$((active_minutes + 1))
+  # Guard against double-counting when launchd fires twice in quick succession
+  # (e.g. RunAtLoad on reload). Only count a minute if ≥55 s have elapsed.
+  if [ "$elapsed_since_last_run" -ge 55 ]; then
+    active_minutes=$((active_minutes + 1))
+  fi
 
   if [ "$active_minutes" -ge $((last_break_notified + BREAK_THRESHOLD)) ]; then
     notify "Time for a break" "break"
@@ -144,7 +168,8 @@ if [ "$paused" -eq 0 ] && [ "$IDLE_TIME" -lt 90 ]; then
   write_state
 elif [ "$paused" -eq 0 ]; then
   consecutive_afk_minutes=$((consecutive_afk_minutes + 1))
-  if [ "$consecutive_afk_minutes" -eq "$AFK_BREAK_THRESHOLD" ]; then
+  # Use -ge (not -eq) so a missed exact hit still resets the timer.
+  if [ "$consecutive_afk_minutes" -ge "$AFK_BREAK_THRESHOLD" ]; then
     last_break_notified=$active_minutes
   fi
   write_state
